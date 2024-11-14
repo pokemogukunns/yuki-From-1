@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <title>LINK TUBE</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="/css/pure-min.css">
+    <link rel="stylesheet" href="/css/grids-responsive-min.css">
+    <link rel="stylesheet" href="/css/ionicons.min.css">
+    <link rel="stylesheet" href="/css/default.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://pokemogukunns.github.io/yuki/index.js"></script>
+<style>
+#error-log {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+        display: block;
+}
+</style>
+</head>
+<h1><a href="#error-log">ログ</a></h1><br>
+<body class="no-theme">
+    <span style="display:none" id="dark_mode_pref"></span>
+    <div class="pure-g">
+        <div class="pure-u-1 pure-u-md-2-24"></div>
+        <div class="pure-u-1 pure-u-md-20-24" id="contents">
+            <div class="pure-g navbar h-box">
+                <div class="pure-u-1 pure-u-md-12-24 searchbar">
+			見れるinvidiousインスタンスがあれば<a href="/invidious">教えてください。</a><br>
+                    <a href="/requestform">新機能の要望やバグ報告</a><br>
+                    <a href="/bbs">掲示板</a>
+                    <a href="https://sites.google.com/view/linkunblockers" target="_blank">LINK</a>
+                    <form class="pure-form" action="/search" method="get">
+                        <fieldset>
+                            <input type="search" id="searchbox" autocomplete="on" autocorrect="on" autocapitalize="none"
+                                spellcheck="false" name="q" placeholder="検索" title="検索" value="">
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+<!--<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <title>連番を簡単に生成！！</title>
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/pure-min.css">
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/grids-responsive-min.css">
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/ionicons.min.css">
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/default.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>-->
+
+<body class="no-theme">
+    <span style="display:none" id="dark_mode_pref"></span>
+    <div class="pure-g">
+        <div class="pure-u-1 pure-u-md-2-24"></div>
+        <div class="pure-u-1 pure-u-md-20-24" id="contents">
+            <div class="pure-g navbar h-box">
+                <div class="pure-u-1 pure-u-md-12-24 searchbar">
+
+                    <a href="/requestform">新機能の要望やバグ報告</a><br>
+                    <a href="/bbs">掲示板</a>
+                    <form class="pure-form" action="/search" method="get">
+                        <fieldset>
+                            <input type="search" id="searchbox" autocomplete="on" autocorrect="on" autocapitalize="none"
+                                spellcheck="false" name="q" placeholder="検索" title="検索" value="">
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+            <div id="player-container" class="h-box">
+                <video style="outline:none;width:100%;background-color:#000;" playsinline="" poster="{% if proxy == "True" %}/thumbnail?v={{ videoid }}{% else %}https://img.youtube.com/vi/{{ videoid }}/0.jpg{% endif
+                    %}" id="player" class="on-video_player video-js player-style-invidious" controls=""
+                    loadedmetadata="settime()" loop="">
+                    {% for videourl in videourls%}
+                    <source src="{{videourl}}">
+                    {% endfor %}
+                </video>
+                </video>
+            </div>
+            <div class="h-box">
+                <h1>{{ videotitle }}</h1>
+            </div>
+            <div class="pure-g">
+                <div class="pure-u-1 pure-u-lg-1-5">
+                    <a href="{{ videourls[0] }}" target="_blank">ダウンロード</a><br>
+                    <a
+                        href="javascript:{navigator.share({title: '動画を共有',text: '{{videotitle}}',url: location.protocol+'//'+document.domain+'/watch?v={{ videoid }}'+'&t='+Math.floor(document.getElementById('player').currentTime),})}">現時点の動画を共有</a><br>
+                    <a
+                        href="javascript:{navigator.share({title: '動画を共有',text: '{{videotitle}}',url: location.href,})}">動画を共有</a><br>
+                    <hr>
+                </div>
+                <div class="pure-u-1 pure-u-lg-3-5">
+                    <div class="h-box">
+                        <a href="/channel/{{authorid}}" style="display:block;width:fit-content;width:-moz-fit-content">
+                            <div class="channel-profile">
+
+                                <img src="{{authoricon}}">
+
+                                <span id="channel-name">{{ author }}</span>
+                            </div>
+                        </a>
+                        <div id="description-box">
+                            <div id="descriptionWrapper">{{ description | safe}}</div>
+                        </div>
+                        <hr>
+                        <div id="comments">
+                        </div>
+                    </div>
+                </div>
+                <div class="pure-u-1 pure-u-lg-1-5">
+                    <!--自動再生<input type="checkbox" id="autonext" onchange="checkautoplay()"><br>-->
+                    ループ再生<input type="checkbox" id="loop" onchange="changeloop()">
+                    {% for re in res %}
+                    <a href="/watch?v={{ re['id'] }}">
+
+                        <div class="thumbnail">
+                            <img loading="lazy" class="thumbnail" src="{% if proxy == "True" %}/thumbnail?v={{ re['id']}}{% else %}https://img.youtube.com/vi/{{ re['id'] }}/0.jpg{% endif %}">
+                        </div>
+                        <p style="width:100%">{{re["title"]}}</p>
+                    </a><br>
+                    <a href="/channel/{{re['authorId']}}">{{re["author"]}}</a>{% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pure-u-1 pure-u-md-2-24"></div>
+    <script>
+        document.cookie = "yuki=True;max-age=2592000;";
+        function getCookie(name) { let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)")); return matches ? decodeURIComponent(matches[1]) : undefined; }
+        //document.getElementById("autonext").checked = getCookie("autonext");
+        function checkautoplay(){document.cookie = "autonext="+document.getElementById("autonext").checked+";max-age=2592000;";}
+        document.getElementById("loop").checked = getCookie("loop");
+        document.getElementById("player").loop = document.getElementById("loop").checked;
+        function changeloop(){document.cookie = "autonext="+document.getElementById("loop").checked+";max-age=2592000;";document.getElementById("player").loop = document.getElementById("loop").checked}
+        //function sleep(waitMsec) {var startMsec = new Date();while (new Date() - startMsec < waitMsec);}
+        //function autopage(){if (document.getElementById('autonext').checked) {sleep(5000);document.cookie = "autonext=true;max-age=2592000;";location.href = "/watch?v={{res[0]["id"]}}";}else{document.cookie = "autonext=false;max-age=2592000;";}}
+        function getUrlQueries() { var queryStr = window.location.search.slice(1); queries = {}; queryStr.split('&').forEach(function (queryStr) { var queryArr = queryStr.split('='); queries[queryArr[0]] = queryArr[1]; }); return queries; }
+        if (typeof getUrlQueries().t === "undefined") { t = 0; } else { document.getElementById("player").currentTime = getUrlQueries().t; }
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/comments?v=" + getUrlQueries().v);
+        xhr.onload = function () {
+            if (xhr.status != 500) {
+                document.getElementById('comments').innerHTML = xhr.responseText;
+            }
+            else { document.getElementById('comments').innerHTML = "エラーが発生しました。再読み込みを試してください"; }
+        };
+        xhr.send();
+        if (document.domain != "yukigennumber.ddo.jp") { document.getElementById("ads_box").innerHTML = ""; }
+        document.getElementById("player").style.maxHeight = document.documentElement.clientHeight * 0.8 + "px";
+
+        document.onkeydown = keydown;
+        function keydown(key) {
+            var v = document.getElementById("player");
+
+            if (key.keyCode == 32 || key.keyCode == 75) {
+                if (v.paused == true) {
+                    v.play();
+                } else {
+                    v.pause();
+                }
+            }
+        }
+    </script>
+    <script>$('#searchbox').autocomplete({
+            source: function (request, response) {
+                {
+                    var url = "/suggest?keyword=" + request.term
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("GET", url);
+                    xhr.onload = function () {
+                        response(JSON.parse(xhr.responseText));
+                    }
+                    xhr.send();
+                }
+            }, delay: 300
+        });</script>
+</body>
+
+</html>
+<!--            <div id="player-container" class="h-box">
+<div id="videoContainer">
+        <video id="videoPlayer" controls autoplay>
+            お使いのブラウザは動画タグをサポートしていません。
+        </video>
+    </div>
+<!--<a href="#">sine</a>
+//https://rr1---sn-oguelnsz.googlevideo.com/videoplayback?
+	//ここまでいつもの
+	//expire=1730212426
+	//この動画リンクの有効期限を示すタイムスタンプ（Unixエポック形式）。
+	//指定された時間が過ぎると、リンクは無効になります。
+	//&ei=6p0gZ5LUOKjZsfIPh9G_sQk
+	//動画リクエストに関連するエラー情報や、ユーザーの環境情報を示すコードです。
+	//&ip=97.115.113.84
+	//リクエストを行ったデバイスのIPアドレス。この情報はアクセス制御に使用されることがあります。
+	//&id=o-AKFGMl5sonfH-Zqrijg1CqWqXKQrNBpabNWTLPR7w9LF
+	//特定の動画を識別するためのID。YouTubeのデータベース内で動画を特定するために使用されます。
+	//&itag=18
+	//動画の形式や解像度を示すID。itag=18は通常、標準的な720p MP4動画を指します。
+	//&source=youtube
+	//動画の出所を示します。ここではyoutubeが指定されており、YouTubeからの動画であることを示します。
+	//&requiressl=yes
+	//このリンクがHTTPS接続を必要とすることを示します。
+	//&xpc=EgVo2aDSNQ%3D%3D
+	//YouTubeの内部トラッキングやセッション管理に関連する情報を含んでいます。具体的な内容は公開されていないため詳細は不明ですが、一般的には、特定のリクエストやセッションの状態を追跡するのに役立つデータです。
+	//&spc=qtApAbgShMpthSP5HXeijXRoytWCC8rzoZ-3cndGIcOl-qR5NhIk
+        //ストリーミングセッションにおける特定のコンテキストやパラメータを示すためのもので、これも内部的なトラッキングに関連しています。具体的な内容は非公開ですが、ストリーミングの状態やリクエストの特性を管理するのに使用されます。
+	//&vprv=1
+	//これは「動画バージョン」を示すパラメータで、特定の動画のバージョンや形式に関する情報を提供します。YouTubeでは、動画が複数のバージョンを持つことがあるため、このパラメータで適切なバージョンを識別します。
+	//&svpuc=1
+	//このパラメータは、特定の条件やオプションを指定するために使用されます。一般的には、ストリーミングの特性やオプションを管理するために利用されます。具体的な内容はYouTube内部の実装に依存するため詳細は不明ですが、ストリーミング体験を最適化するために必要な情報です。
+	//&mime=video%2Fmp4
+	//動画のMIMEタイプ。この場合はvideo/mp4で、MP4形式の動画であることを示します。
+	//&rqh=1&gir=yes
+	//&clen=181255217
+	//動画のファイルサイズをバイト単位で示します。ここでは181,255,217バイトです。
+	//&ratebypass=yes
+	//動画のストリーミングにおいて、通常の帯域制限をバイパスすることを示します。
+	//&dur=2318.837
+	//動画の長さを秒単位で示します。この場合、2318.837秒（約39分）です。
+	//&lmt=1722017168027669
+	//最終更新時のタイムスタンプです。動画が最後に更新された時間を示します。
+	//&fexp=24350590,24350675,24350705,24350737,51312688,51326931&c=ANDROID
+	//動画が関連する特定の機能や実験的機能に関する情報です。
+	//&txp=4538434
+	//これはトランザクションのパラメータで、特定のストリーミングセッションやリクエストの状態を追跡するために使用されます。具体的には、YouTubeがそのセッションで何が起きているかを管理するのに役立ちます。
+	//&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cxpc%2Cspc%2Cvprv%2Csvpuc%2Cmime%2Crqh%2Cgir%2Cclen%2Cratebypass%2Cdur%2Clmt
+	//動画ストリーミングリクエストに関連するパラメータのリストを示します。このリストの各項目は、ストリーミングを最適化するために必要な情報を提供します。
+	//&sig=AJfQdSswRgIhAMU4-LI44suRAISWt5C0gx6BrmfRhtgVA7xnSN2U-0oKAiEA89AvrT5rCGTYtVNgrUS_bh2ch6SfgcgQRXtbpDWBNR4%3D
+	//リクエストの正当性を保証するための署名です。この署名は、リクエストが改ざんされていないことを確認するために使用されます。YouTubeは、特定の条件を満たすリクエストのみを受け入れるため、この署名を用いています。
+	//アクセスを認証するための署名です。この情報を使って、リクエストが正当であることを確認します。
+	//&host=rr1---sn-jxou0gtapo3-2qml.googlevideo.com
+	//動画がホストされているサーバーの情報です。
+	//&rm=sn-jxou0gtapo3-2qml7e,sn-nx5sk7e
+	//リダイレクト先のサーバー情報。
+	//&rrc=79,104
+	//リクエストに関連するカウンタや状態を示す情報。
+	//&req_id=61f1d2866c74a3ee
+	//特定のリクエストを識別するためのユニークなIDです。
+	//&cmsv=e
+	//コンテンツ管理システムに関連するバージョン情報。
+	//&rms=rdu,au
+	//ストリーミングに関する情報やサービス。
+	//&redirect_counter=2
+	//リダイレクトされた回数を示します。
+	//&cms_redirect=yes
+	//コンテンツ管理システムからのリダイレクトを示します。
+	//&ipbypass=yes
+	//IPアドレスのバイパスを許可するかどうかを示します
+	//&met=1730191223,
+	//リクエストに関連するメタデータ。
+	//&mh=ny&mip=106.130.140.242&mm=29&mn=sn-oguelnsz&ms=rdu&mt=1730190557&mv=m&mvi=1&pl=24
+	//これらのパラメータは、リクエストの最適化やストリーミングに関連する情報です。
+	//&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms
+	//IPアドレスによる制限をバイパスするための設定。特定の状況下で、リクエスト元のIPアドレスに依存せずにアクセスできるようにします。
+	//&lsig=ACJ0pHgwRQIhAJPbEkCor3mi3okcG1eRv_fPwEyteVP_ZM4JsGfVCb6cAiB3IDG0_jkH4OKzmeUpri8S0dKpHq9vyKPTWG3P-z4Zbg%3D%3D
+	//リクエストの署名情報。セキュリティを強化するために使用されます。
+
+</body>
+</html>
+
+                <a onclick="window.location.reload(true);">
+	<i class="fa fa-refresh" aria-hidden="true"></i><span>再読み込み</span>
+</a>
+            </div>
+            <div class="h-box">
+                <h1>{{ videotitle }}</h1>
+            </div>
+            <div class="pure-g">
+                <div class="pure-u-1 pure-u-lg-1-5">
+                    <a href="{{ videourls[0] }}" target="_blank" download="{{videotitle}}.mp4">動画直接ダウンロード</a>
+                    <a href="{{ videourls[0] }}" target="_blank">ダウンロード</a><br>
+                    <a
+                        href="javascript:{navigator.share({title: '動画を共有',text: '{{videotitle}}',url: location.protocol+'//'+document.domain+'/watch?v={{ videoid }}'+'&t='+Math.floor(document.getElementById('player').currentTime),})}">現時点の動画を共有</a><br>
+                    <a
+                        href="javascript:{navigator.share({title: '動画を共有',text: '{{videotitle}}',url: location.href,})}">動画を共有</a><br>
+                    <hr>
+                </div>
+                <div class="pure-u-1 pure-u-lg-3-5">
+                    <div class="h-box">
+                        <a href="/channel/${videoData.uploaderId}" style="display:block;width:fit-content;width:-moz-fit-content">
+                            <div class="channel-profile">
+
+                                <img id="channel-icon">
+
+                                <span id="channel-name">{{ author }}</span>
+                            </div>
+                        </a>
+                        <div id="description-box">
+                            <div id="descriptionWrapper">{{ description | safe}}</div>
+                        </div>
+                        <hr>
+                        <div id="comments">
+                        </div>
+                    </div>
+                </div>
+                <div class="pure-u-1 pure-u-lg-1-5">
+                    <!--自動再生<input type="checkbox" id="autonext" onchange="checkautoplay()"><br>-->
+                    ループ再生<input type="checkbox" id="loop" onchange="changeloop()">
+                    {% for re in res %}
+                    <a href="/watch?v={{ re['id'] }}">
+
+                        <div class="thumbnail">
+                            <img loading="lazy" class="thumbnail" src="{% if proxy == "True" %}/thumbnail?v={{ re['id']}}{% else %}https://img.youtube.com/vi/{{ re['id'] }}/0.jpg{% endif %}">
+                        </div>
+                        <p style="width:100%">{{re["title"]}}</p>
+                    </a><br>
+                    <a href="/channel/{{re['authorId']}}">{{re["author"]}}</a>{% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pure-u-1 pure-u-md-2-24"></div><br>
+    <div id="error-log"></div>
+	<script>
+        function logError(message) {
+            const logDiv = document.getElementById('error-log');
+            const logEntry = document.createElement('p');
+            logEntry.textContent = message;
+            logDiv.appendChild(logEntry);
+        }
+    </script>
+    <script>
+        document.cookie = "yuki=True;max-age=2592000000;";
+        function getCookie(name) { let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)")); return matches ? decodeURIComponent(matches[1]) : undefined; }
+        //document.getElementById("autonext").checked = getCookie("autonext");
+        function checkautoplay(){document.cookie = "autonext="+document.getElementById("autonext").checked+";max-age=2592000;";}
+        document.getElementById("loop").checked = getCookie("loop");
+        document.getElementById("player").loop = document.getElementById("loop").checked;
+        function changeloop(){document.cookie = "autonext="+document.getElementById("loop").checked+";max-age=2592000;";document.getElementById("player").loop = document.getElementById("loop").checked}
+        //function sleep(waitMsec) {var startMsec = new Date();while (new Date() - startMsec < waitMsec);}
+        //function autopage(){if (document.getElementById('autonext').checked) {sleep(5000);document.cookie = "autonext=true;max-age=2592000;";location.href = "/watch?v={{res[0]["id"]}}";}else{document.cookie = "autonext=false;max-age=2592000;";}}
+        function getUrlQueries() { var queryStr = window.location.search.slice(1); queries = {}; queryStr.split('&').forEach(function (queryStr) { var queryArr = queryStr.split('='); queries[queryArr[0]] = queryArr[1]; }); return queries; }
+        if (typeof getUrlQueries().t === "undefined") { t = 0; } else { document.getElementById("player").currentTime = getUrlQueries().t; }
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/comments?v=" + getUrlQueries().v);
+        xhr.onload = function () {
+            if (xhr.status != 500) {
+                document.getElementById('comments').innerHTML = xhr.responseText;
+            }
+            else { document.getElementById('comments').innerHTML = "エラーが発生しました。再読み込みを試してください"; }
+        };
+        xhr.send();
+        if (document.domain != "yukigennumber.ddo.jp") { document.getElementById("ads_box").innerHTML = ""; }
+        document.getElementById("player").style.maxHeight = document.documentElement.clientHeight * 0.8 + "px";
+
+        document.onkeydown = keydown;
+        function keydown(key) {
+            var v = document.getElementById("player");
+
+            if (key.keyCode == 32 || key.keyCode == 75) {
+                if (v.paused == true) {
+                    v.play();
+                } else {
+                    v.pause();
+                }
+            }
+        }
+    </script>
+<script>document.addEventListener("DOMContentLoaded", function () {
+    // URLからvideoIDを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoID = urlParams.get("v");
+
+    if (!videoID) {
+        console.error("動画IDが見つかりません");
+        return;
+    }
+
+    const apiURL = `https://youtube.privacyplz.org/api/v1/videos/${videoID}`;
+
+    // Invidious APIから動画データを取得
+    fetch(apiURL)
+        .then(response => response.json())
+        .then(data => {
+            // JSONから必要な情報を抽出
+            const videoTitle = data.title;
+            const videoURL = data.videoStreams[0].url; // 動画ストリームURL
+            const thumbnailURL = data.videoThumbnails[0].url;
+            const channelName = data.author;
+            const channelIcon = data.authorThumbnails[0]?.url || "";
+            const description = data.description;
+            const relatedVideos = data.relatedStreams;
+
+            // HTML要素にデータを挿入
+            document.getElementById("video-title").textContent = videoTitle;
+            document.getElementById("video-player").src = videoURL;
+            document.getElementById("thumbnail").src = thumbnailURL;
+            document.getElementById("channel-name").textContent = channelName;
+            document.getElementById("channel-icon").src = channelIcon;
+            document.getElementById("description").textContent = description;
+
+            // チャンネル名をリンクにする
+            const channelLink = document.getElementById("channel-link");
+            channelLink.href = `https://youtube.privacyplz.org/channel/${data.authorId}`;
+            channelLink.textContent = channelName;
+
+            // 関連動画リストを作成
+            const relatedList = document.getElementById("related-videos");
+            relatedVideos.forEach(video => {
+                const listItem = document.createElement("li");
+                const link = document.createElement("a");
+                link.href = `${window.location.origin}/watch?v=${video.videoId}`;
+                link.textContent = video.title;
+                listItem.appendChild(link);
+                relatedList.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error("ビデオデータの取得中にエラーが発生しました:", error));
+});
+
+    </script>
+    <script>$('#searchbox').autocomplete({
+            source: function (request, response) {
+                {
+                    var url = "/suggest?keyword=" + request.term
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("GET", url);
+                    xhr.onload = function () {
+                        response(JSON.parse(xhr.responseText));
+                    }
+                    xhr.send();
+                }
+            }, delay: 300
+        });</script>
+</body>
+
+</html>
+-->
