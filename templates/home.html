@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <title>LINK TUBE</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/empty.css">
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/pure-min.css">
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/grids-responsive-min.css">
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/ionicons.min.css">
+    <link rel="stylesheet" href="https://pokemogukunns.github.io/yuki-math/css/default.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+
+    <body class="no-theme">
+        <div class="pure-g h-box" id="search-widget">
+            <div class="pure-u-1" id="logo">
+                <h1 href="/" class="pure-menu-heading">Yuki Youtube</h1>
+            <a href="/bbs">掲示板</a>
+            </div>
+            <div class="pure-u-1-4"></div>
+            <div class="pure-u-1 pure-u-md-12-24 searchbar">
+                <form class="pure-form" action="/search" method="get">
+                    <fieldset>
+                        <input type="search" id="searchbox" autocomplete="on" autocorrect="on" autocapitalize="none" spellcheck="false" autofocus="" name="q" placeholder="検索" title="検索" value="">
+                    </fieldset>
+                </form>
+            </div>
+            <div class="pure-u-1-4"></div>
+            
+        </div>
+        
+        <script>$('#searchbox').autocomplete({
+            source: function (request, response) {
+                {
+            var url = "/suggest?keyword="+ request.term
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url);
+            xhr.onload = function() {
+                response(JSON.parse(xhr.responseText));
+            }
+            xhr.send();
+        }},delay:300});</script>
+
+        <a href="#改造点">改造点</a><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+        <h1 id="改造点">改造点</h1>
+<p><h2>ここではこのyuki新機能について説明します。</h2></p><br>
+<p><h3>1.動画を直接ダウンロードできるようになった。</h3></p><br>
+<p><h3>2.とっても軽くなった。</h3></p><br>
+        少ないが、結構使いやすくなったのではないでしょうか。<br>
+        ©️pokemogukunn
+
+
+
+
+
+    </body>
+
+</html>
