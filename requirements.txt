@@ -5,3 +5,4 @@ uvicorn
 Flask
 requests[socks]
 stem
+fastapi-cache
