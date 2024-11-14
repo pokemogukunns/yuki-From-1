@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINK TUBE</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #4A90E2;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        a {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            background-color: #4A90E2;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        a:hover {
+            background-color: #357ABD;
+        }
+        input[type="text"] {
+            width: 250px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+        input[type="button"] {
+            padding: 10px 20px;
+            background-color: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="button"]:hover {
+            background-color: #357ABD;
+        }
+        input[type="button"]:active {
+            background-color: #2E64A2;
+        }
+        #info {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #ff6f61;
+        }
+    </style>
+    <script>
+        function getlevel() {
+            const input = document.getElementById('word').value.toLowerCase();
+            
+            // "link" または "LINK" が入力された場合、指定URLにリダイレクト
+            if (input === "link") {
+                window.location.href = "https://sites.google.com/view/linkunblockers";
+            } else if (input === "yuki") {
+                document.cookie = "yuki=True; path=/;";
+            } else {
+                let req = new XMLHttpRequest();
+                req.addEventListener("load", function() {
+                    document.getElementById('info').textContent = this.responseText;
+                });
+                req.open("GET", "/answer?q=" + document.getElementById('word').value);
+                req.send();
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>LINK TUBE</h1>
+    <p>このサイトは少しYUKIに改造を加えたLINK TUBEです。</p>
+    <p>パスワードの「yuki」を入力し、「確認」を押してください。他にもLINKと入力し、確認を押すとLINK公式サイトへ飛ぶことができます。<br>
+       その後、URLの/wordを削除してください。</p>
+    <a href="https://sites.google.com/view/linkunblockers" target="_blank">プロキシサイト一覧</a><br><br>
+    <input id="word" type="text" placeholder="パスワードを入力">
+    <input type="button" onClick="getlevel()" value="確認">
+    <div id="info"></div>
+</body>
+</html>
