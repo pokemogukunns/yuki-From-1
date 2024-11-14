@@ -1,0 +1,7 @@
+jinja2
+requests
+fastapi
+uvicorn
+Flask
+requests[socks]
+stem
