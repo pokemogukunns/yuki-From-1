@@ -109,7 +109,6 @@ async def get_channel(channelid: str):
 async def home(request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
     if not check_cookie(yuki):
         return redirect("/")
-          response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
     
     # ホームページに必要なデータをここで準備
     return templates.TemplateResponse("home.html", {
