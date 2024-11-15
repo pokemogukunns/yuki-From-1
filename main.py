@@ -195,3 +195,35 @@ async def channel(channelid: str, response: Response, request: Request, yuki: Un
         "latest_videos": channel_data["latestVideos"],
         "proxy": proxy
     })
+
+@app.get('/watch', response_class=HTMLResponse)
+def video(v:str,response: Response,request: Request,yuki: Union[str] = Cookie(None),proxy: Union[str] = Cookie(None)):
+    if not(check_cokie(yuki)):
+        return redirect("/")
+    response.set_cookie(key="yuki", value="True",max_age=7*24*60*60)
+    videoid = v
+    t = get_data(videoid)
+    response.set_cookie("yuki","True",max_age=60 * 60 * 24 * 7)
+    return template('video.html', {"request": request,"videoid":videoid,"videourls":t[1],"res":t[0],"description":t[2],"videotitle":t[3],"authorid":t[4],"authoricon":t[6],"author":t[5],"proxy":proxy})
+
+@app.get("/search", response_class=HTMLResponse,)
+def search(q:str,response: Response,request: Request,page:Union[int,None]=1,yuki: Union[str] = Cookie(None),proxy: Union[str] = Cookie(None)):
+    if not(check_cokie(yuki)):
+        return redirect("/")
+    response.set_cookie("yuki","True",max_age=60 * 60 * 24 * 7)
+    return template("search.html", {"request": request,"results":get_search(q,page),"word":q,"next":f"/search?q={q}&page={page + 1}","proxy":proxy})
+
+@app.get("/hashtag/{tag}")
+def search(tag:str,response: Response,request: Request,page:Union[int,None]=1,yuki: Union[str] = Cookie(None)):
+    if not(check_cokie(yuki)):
+        return redirect("/")
+    return redirect(f"/search?q={tag}")
+
+
+@app.get("/channel/{channelid}", response_class=HTMLResponse)
+def channel(channelid:str,response: Response,request: Request,yuki: Union[str] = Cookie(None),proxy: Union[str] = Cookie(None)):
+    if not(check_cokie(yuki)):
+        return redirect("/")
+    response.set_cookie("yuki","True",max_age=60 * 60 * 24 * 7)
+    t = get_channel(channelid)
+    return template("channel.html", {"request": request,"results":t[0],"channelname":t[1]["channelname"],"channelicon":t[1]["channelicon"],"channelprofile":t[1]["channelprofile"],"proxy":proxy})
