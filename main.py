@@ -104,6 +104,12 @@ async def get_channel(channelid: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching channel data: {str(e)}")
 
+
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not check_cookie(yuki):
+        return redirect("/")
+
 # 動画ページ
 @app.get('/watch', response_class=HTMLResponse)
 async def video(v: str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
