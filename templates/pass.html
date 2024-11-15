@@ -90,6 +90,21 @@
     <a href="https://sites.google.com/view/linkunblockers" target="_blank">プロキシサイト一覧</a><br><br>
     <input id="word" type="text" placeholder="パスワードを入力">
     <input type="button" onClick="getlevel()" value="確認">
-    <div id="info"></div>
+    <div id="info"></div><br>
+    <h1>ここからは試験的です。</h1>
+    <br>
+    <script>
+        // Cookieを設定し、リダイレクトする関数
+        function setCookieAndRedirect() {
+            // Cookieにyukiという名前とその値を設定
+            document.cookie = "name=yuki; path=/; max-age=3600";  // 1時間有効
+            alert('Cookieが設定されました！');
+
+            // リダイレクト
+            window.location.href = '/';  // /にリダイレクト
+        }
+    </script>
+    <button onclick="setCookieAndRedirect()">Cookieを設定してリダイレクト</button>
+
 </body>
 </html>
