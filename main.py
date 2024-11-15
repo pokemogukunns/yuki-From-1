@@ -109,7 +109,23 @@ async def get_channel(channelid: str):
 async def home(request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
     if not check_cookie(yuki):
         return redirect("/")
+          response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
+    
+    # ホームページに必要なデータをここで準備
+    return templates.TemplateResponse("home.html", {
+        "request": request,
+        "proxy": proxy
+    })
 
+
+@app.get("/pass", response_class=HTMLResponse)
+async def pass_page(request: Request, proxy: Union[str] = Cookie(None)):
+    # クッキー設定なし
+    return templates.TemplateResponse("pass.html", {
+        "request": request,
+        "proxy": proxy
+    })
+    
 # 動画ページ
 @app.get('/watch', response_class=HTMLResponse)
 async def video(v: str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
