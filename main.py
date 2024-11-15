@@ -26,8 +26,8 @@ app = FastAPI()
 
 
 
-app.mount("/blog", StaticFiles(directory="./blog", html=True), name="static")
-app.mount("/bloger", StaticFiles(directory="./bloger", html=True), name="static")
+#app.mount("/blog", StaticFiles(directory="./blog", html=True), name="static")
+#app.mount("/bloger", StaticFiles(directory="./bloger", html=True), name="static")
 
 
 # テンプレート設定
