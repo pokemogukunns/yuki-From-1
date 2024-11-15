@@ -1,102 +1,124 @@
 import json
 import requests
 import urllib.parse
+import time
 import datetime
+import random
 import os
-from fastapi import FastAPI, Request, Response
-from fastapi.responses import HTMLResponse, PlainTextResponse
-from fastapi.exceptions import HTTPException
+import subprocess
+from cache import cache  # キャッシュ管理用
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi import Response, Cookie, Request
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse as redirect
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 from typing import Union
-from starlette.responses import RedirectResponse
-from starlette.middleware.trustedhost import TrustedHostMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi.cache import Cache
 
-# FastAPIのインスタンス作成
+# 定数
+max_api_wait_time = 3  # APIリクエストの最大待機時間（秒）
+max_time = 10  # プロセスの最大実行時間（秒）
+apis = [r"https://youtube.privacyplz.org/", r"https://inv.nadeko.net/"]  # APIエンドポイントリスト
+
 app = FastAPI()
 
-# APIリスト（プライバシー用API等）
-apis = [r"https://youtube.privacyplz.org/", r"https://inv.nadeko.net/"]
+# テンプレート設定
+templates = Jinja2Templates(directory="templates")
 
-# キャッシュ設定（任意）
-cache = Cache()
+# クッキーのチェック関数
+def check_cookie(cookie_value: str) -> bool:
+    return cookie_value == "True"
 
-# グローバル変数
-apichannels = []
-apicomments = []
+# 動画データを非同期に取得する関数
+async def get_data(videoid: str):
+    # 仮のAPIリクエスト
+    try:
+        # APIリクエストのURL構築
+        url = f"https://youtube.privacyplz.org/api/v1/videos/{urllib.parse.quote(videoid)}"
+        response = requests.get(url)  # requestsを非同期でなく使用するため、httpxなどを使うとよい
 
-# 必要な外部リクエストを送る関数
-def apirequest(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.text
-    else:
-        response.raise_for_status()
+        # レスポンスが正常でない場合の処理
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="Failed to retrieve video data")
 
-def apichannelrequest(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.text
-    else:
-        response.raise_for_status()
+        t = response.json()  # JSONデータを取得
 
-def apicommentsrequest(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        return response.text
-    else:
-        response.raise_for_status()
+        return [
+            [{"id": i["videoId"], "title": i["title"], "authorId": i["authorId"], "author": i["author"]} for i in t["recommendedVideos"]],
+            list(reversed([i["url"] for i in t["formatStreams"]]))[:2],
+            t["descriptionHtml"].replace("\n", "<br>"),
+            t["title"],
+            t["authorId"],
+            t["author"],
+            t["authorThumbnails"][-1]["url"]
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching video data: {str(e)}")
 
-# 動画情報を取得する関数
-def get_data(videoid):
-    t = json.loads(apirequest(apis[0] + "api/v1/videos/" + urllib.parse.quote(videoid)))
-    return [{"id": i["videoId"], "title": i["title"], "authorId": i["authorId"], "author": i["author"]} for i in t["recommendedVideos"]], list(reversed([i["url"] for i in t["formatStreams"]]))[:2], t["descriptionHtml"].replace("\n", "<br>"), t["title"], t["authorId"], t["author"], t["authorThumbnails"][-1]["url"]
+# 検索結果を非同期に取得する関数
+async def get_search(q: str, page: Union[int, None] = 1):
+    try:
+        url = f"https://youtube.privacyplz.org/api/v1/search?q={urllib.parse.quote(q)}&page={page}&hl=jp"
+        response = requests.get(url)
 
-# 検索結果を取得する関数
-def get_search(q, page):
-    t = json.loads(apirequest(apis[0] + f"api/v1/search?q={urllib.parse.quote(q)}&page={page}&hl=jp"))
-    
-    def load_search(i):
-        if i["type"] == "video":
-            return {"title": i["title"], "id": i["videoId"], "authorId": i["authorId"], "author": i["author"], 
-                    "length": str(datetime.timedelta(seconds=i["lengthSeconds"])), "published": i["publishedText"], "type": "video"}
-        elif i["type"] == "playlist":
-            return {"title": i["title"], "id": i["playlistId"], "thumbnail": i["videos"][0]["videoId"], "count": i["videoCount"], "type": "playlist"}
-        else:
-            return {"author": i["author"], "id": i["authorId"], "thumbnail": i["authorThumbnails"][-1]["url"], "type": "channel"}
-    
-    return [load_search(i) for i in t]
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="Failed to retrieve search data")
 
-# チャンネル情報を取得する関数
-def get_channel(channelid):
-    t = json.loads(apichannelrequest(apis[0] + "api/v1/channels/" + urllib.parse.quote(channelid)))
-    if not t["latestVideos"]:
-        raise HTTPException(status_code=500, detail="APIがチャンネルを返しませんでした")
-    
-    return [{"title": i["title"], "id": i["videoId"], "authorId": t["authorId"], "author": t["author"], "published": i["publishedText"], "type": "video"} for i in t["latestVideos"]], {"channelname": t["author"], "channelicon": t["authorThumbnails"][-1]["url"], "channelprofile": t["descriptionHtml"]}
+        t = response.json()
 
-# プレイリスト情報を取得する関数
-def get_playlist(listid, page):
-    t = json.loads(apirequest(apis[0] + f"/api/v1/playlists/{urllib.parse.quote(listid)}?page={urllib.parse.quote(page)}"))
-    return [{"title": i["title"], "id": i["videoId"], "authorId": i["authorId"], "author": i["author"], "type": "video"} for i in t["videos"]]
+        def load_search(i):
+            if i["type"] == "video":
+                return {"title": i["title"], "id": i["videoId"], "authorId": i["authorId"], "author": i["author"], 
+                        "length": str(datetime.timedelta(seconds=i["lengthSeconds"])), "published": i["publishedText"], "type": "video"}
+            elif i["type"] == "playlist":
+                return {"title": i["title"], "id": i["playlistId"], "thumbnail": i["videos"][0]["videoId"], "count": i["videoCount"], "type": "playlist"}
+            else:
+                if i["authorThumbnails"][-1]["url"].startswith("https"):
+                    return {"author": i["author"], "id": i["authorId"], "thumbnail": i["authorThumbnails"][-1]["url"], "type": "channel"}
+                else:
+                    return {"author": i["author"], "id": i["authorId"], "thumbnail": r"https://" + i["authorThumbnails"][-1]["url"], "type": "channel"}
 
-# コメント情報を取得する関数
-def get_comments(videoid):
-    t = json.loads(apicommentsrequest(apis[0] + f"api/v1/comments/{urllib.parse.quote(videoid)}?hl=jp"))
-    return [{"author": i["author"], "authoricon": i["authorThumbnails"][-1]["url"], "authorid": i["authorId"], "body": i["contentHtml"].replace("\n", "<br>")} for i in t["comments"]]
+        return [load_search(i) for i in t["results"]]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching search data: {str(e)}")
 
-# ホーム画面
-@app.get("/")
-def home():
-    return {"message": "Welcome to the YouTube-like API!"}
+# チャンネル情報を非同期で取得する関数（仮実装）
+async def get_channel(channelid: str):
+    try:
+        url = f"https://youtube.privacyplz.org/api/v1/channels/{urllib.parse.quote(channelid)}"
+        response = requests.get(url)
 
-# 動画情報表示
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="Failed to retrieve channel data")
+
+        t = response.json()
+
+        # チャンネルのデータを取得
+        return {
+            "channelname": t["author"],
+            "channelicon": t["authorThumbnails"][-1]["url"],
+            "channelprofile": t["descriptionHtml"],
+            "latestVideos": [{"title": i["title"], "videoId": i["videoId"], "author": t["author"], "publishedText": i["publishedText"]} for i in t["latestVideos"]]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching channel data: {str(e)}")
+
+# 動画ページ
 @app.get('/watch', response_class=HTMLResponse)
-def video(v: str, response: Response, request: Request):
-    videoid = v
-    t = get_data(videoid)
+async def video(v: str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not check_cookie(yuki):
+        return redirect("/")
     
-    return template('video.html', {
+    response.set_cookie(key="yuki", value="True", max_age=7 * 24 * 60 * 60)
+
+    videoid = v
+    try:
+        t = await get_data(videoid)
+    except HTTPException as e:
+        return templates.TemplateResponse("error.html", {"request": request, "message": e.detail})
+
+    return templates.TemplateResponse('video.html', {
         "request": request,
         "videoid": videoid,
         "videourls": t[1],
@@ -106,85 +128,48 @@ def video(v: str, response: Response, request: Request):
         "authorid": t[4],
         "authoricon": t[6],
         "author": t[5],
-        "proxy": None
+        "proxy": proxy
     })
 
-# 検索結果表示
+# 検索ページ
 @app.get("/search", response_class=HTMLResponse)
-def search(q: str, response: Response, request: Request, page: Union[int, None] = 1):
-    return template("search.html", {
+async def search(q: str, response: Response, request: Request, page: Union[int, None] = 1, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not check_cookie(yuki):
+        return redirect("/")
+    
+    response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
+
+    try:
+        results = await get_search(q, page)
+    except HTTPException as e:
+        return templates.TemplateResponse("error.html", {"request": request, "message": e.detail})
+
+    return templates.TemplateResponse("search.html", {
         "request": request,
-        "results": get_search(q, page),
+        "results": results,
         "word": q,
         "next": f"/search?q={q}&page={page + 1}",
-        "proxy": None
+        "proxy": proxy
     })
 
-# ハッシュタグ検索
-@app.get("/hashtag/{tag}")
-def hashtag(tag: str):
-    return RedirectResponse(f"/search?q={tag}")
-
-# チャンネル情報表示
+# チャンネルページ
 @app.get("/channel/{channelid}", response_class=HTMLResponse)
-def channel(channelid: str, response: Response, request: Request):
-    t = get_channel(channelid)
-    return template("channel.html", {
+async def channel(channelid: str, response: Response, request: Request, yuki: Union[str] = Cookie(None), proxy: Union[str] = Cookie(None)):
+    if not check_cookie(yuki):
+        return redirect("/")
+    
+    response.set_cookie("yuki", "True", max_age=60 * 60 * 24 * 7)
+
+    try:
+        channel_data = await get_channel(channelid)
+    except HTTPException as e:
+        return templates.TemplateResponse("error.html", {"request": request, "message": e.detail})
+
+    return templates.TemplateResponse('channel.html', {
         "request": request,
-        "results": t[0],
-        "channelname": t[1]["channelname"],
-        "channelicon": t[1]["channelicon"],
-        "channelprofile": t[1]["channelprofile"],
-        "proxy": None
+        "channelname": channel_data["channelname"],
+        "channelicon": channel_data["channelicon"],
+        "channelprofile": channel_data["channelprofile"],
+        "latest_videos": channel_data["latestVideos"],
+        "proxy": proxy
     })
-
-# プレイリスト表示
-@app.get("/playlist", response_class=HTMLResponse)
-def playlist(list: str, response: Response, request: Request, page: Union[int, None] = 1):
-    return template("search.html", {
-        "request": request,
-        "results": get_playlist(list, str(page)),
-        "word": "",
-        "next": f"/playlist?list={list}",
-        "proxy": None
-    })
-
-# コメント表示
-@app.get("/comments")
-def comments(request: Request, v: str):
-    return template("comments.html", {"request": request, "comments": get_comments(v)})
-
-# サムネイル画像表示
-@app.get("/thumbnail")
-def thumbnail(v: str):
-    return Response(content=requests.get(f"https://img.youtube.com/vi/{v}/0.jpg").content, media_type="image/jpeg")
-
-# API情報表示
-@app.get("/info", response_class=HTMLResponse)
-def viewlist(response: Response, request: Request):
-    global apis, apichannels, apicomments
-    return template("info.html", {
-        "request": request,
-        "Youtube_API": apis[0],
-        "Channel_API": apichannels[0],
-        "Comments_API": apicomments[0]
-    })
-
-# APIの推測レベル表示
-@app.get("/answer")
-def set_cokie(q: str):
-    t = get_level(q)
-    if t > 5:
-        return f"level{t}\n推測を推奨する"
-    elif t == 0:
-        return "level12以上\nほぼ推測必須"
-    return f"level{t}\n覚えておきたいレベル"
-
-# エラーハンドリング
-@app.exception_handler(500)
-def api_error(request: Request, exc: Exception):
-    return template("APIwait.html", {"request": request}, status_code=500)
-
-@app.exception_handler(APItimeoutError)
-def api_timeout_error(request: Request, exception: APItimeoutError):
-    return template("APIwait.html", {"request": request}, status_code=500)
