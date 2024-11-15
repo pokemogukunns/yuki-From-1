@@ -24,6 +24,12 @@ apis = [r"https://youtube.privacyplz.org/", r"https://inv.nadeko.net/"]  # API�
 
 app = FastAPI()
 
+
+
+app.mount("/blog", StaticFiles(directory="./blog", html=True), name="static")
+app.mount("/bloger", StaticFiles(directory="./bloger", html=True), name="static")
+
+
 # テンプレート設定
 templates = Jinja2Templates(directory="templates")
 
