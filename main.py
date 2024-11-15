@@ -7,6 +7,7 @@ import random
 import os
 import subprocess
 from cache import cache  # キャッシュ管理用
+from cache import cache
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi import Response, Cookie, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse as redirect
